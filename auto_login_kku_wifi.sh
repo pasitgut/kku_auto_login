@@ -21,6 +21,7 @@ ping -c 1 -W 1 "$KKU_HOST" > /dev/null 2>&1
 if [ $? -eq 0 ]; then
         echo "Connected to KKU WiFi Network. Now checking internet access..."
 
+        curl -X GET "https://nac03.kku.ac.th/logout" > /dev/null
         if check_internet; then
                 echo "Internet connection is active"
         else
