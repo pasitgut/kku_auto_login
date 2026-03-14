@@ -5,16 +5,23 @@ KKU_HOST="nac03.kku.ac.th"
 INTERNET_HOST="8.8.8.8"
 
 KKU_LOGIN_URL="https://nac03.kku.ac.th/login"
+KKU_LOGOUT_URL="https://nac03.kku.ac.th/logout"
+
 KKU_USERNAME="YOUR_STUDENT_ID"
 KKU_PASSWORD="YOUR_PASSWORD"
 
 check_internet() {
-
         ping -c 1 -W 2 "$INTERNET_HOST" > /dev/null 2>&1
         return $?
 }
 
 echo "Checking KKU WiFi connection..."
+
+# logout ก่อนทุกครั้ง
+echo "Logging out from KKU WiFi session..."
+curl -s -k "$KKU_LOGOUT_URL" > /dev/null
+
+sleep 2 
 
 ping -c 1 -W 1 "$KKU_HOST" > /dev/null 2>&1
 
