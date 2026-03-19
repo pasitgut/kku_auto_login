@@ -7,55 +7,60 @@ INTERNET_HOST="8.8.8.8"
 KKU_LOGIN_URL="https://nac03.kku.ac.th/login"
 KKU_LOGOUT_URL="https://nac03.kku.ac.th/logout"
 
-KKU_USERNAME="YOUR_STUDENT_ID"
-KKU_PASSWORD="YOUR_PASSWORD"
+KKU_USERNAME="KKU_STUDENTID" # Don't use "-"
+KKU_PASSWORD="KKU_PASSWORD"
+
+log() {
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+}
 
 check_internet() {
+
         ping -c 1 -W 2 "$INTERNET_HOST" > /dev/null 2>&1
         return $?
 }
+log "Checking KKU WiFi connection..."
 
-echo "Checking KKU WiFi connection..."
-
-# logout ก่อนทุกครั้ง
-echo "Logging out from KKU WiFi session..."
+log "Logging out from KKU WiFi session..."
 curl -s -k "$KKU_LOGOUT_URL" > /dev/null
 
-sleep 2 
+sleep 2
 
 ping -c 1 -W 1 "$KKU_HOST" > /dev/null 2>&1
 
 if [ $? -eq 0 ]; then
-        echo "Connected to KKU WiFi Network. Now checking internet access..."
+        log "Connected to KKU WiFi Network. Now checking internet access..."
 
-        curl -X GET "https://nac03.kku.ac.th/logout" > /dev/null
         if check_internet; then
-                echo "Internet connection is active"
+                log "Internet connection is active"
         else
-                echo "Internet connection is down. Attemping to log in to KKU WiFi..."
+                log "Internet connection is down. Attemping to log in to KKU WiFi..."
 
                 if [ -z "$KKU_USERNAME" ]; then
-                        echo "Error: Please set your KKU_USERNAME in the script."
+                        log "Error: Please set your KKU_USERNAME in the script."
                         exit 1
                 fi
 
                 curl -s -k -X POST "$KKU_LOGIN_URL" --data "username=$KKU_USERNAME&password=$KKU_PASSWORD" > /dev/null
 
-                echo "Login attempt sent. Verifying connection status..."
+                log "Login attempt sent. Verifying connection status..."
 
                 sleep 2
 
                 if check_internet; then
-                        echo "Success: Login successful. Internet connection is now active."
+                        log "Success: Login successful. Internet connection is now active."
                 else
-                        echo "Failed: Login failed. Please check your username/password or network status."
+                        log "Failed: Login failed. Please check your username/password or network status."
+
                 fi
         fi
 else
-        echo "Not connected to KKU network. Checking general internet connection..."
-        if check_internet; then
-                echo "Internet connection is active"
+        log "Not connected to KKU network. Checking general internet connection..."
+        ping -c 1 -W 1 "$INTERNET_HOST" > /dev/null 2>&1
+
+        if [ $? -eq 0 ]; then
+                log "Internet connection is active"
         else
-                echo "Internet connection is down"
+                log "Internet connection is down"
         fi
 fi
